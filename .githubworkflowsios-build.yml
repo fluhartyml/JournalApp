@@ -1,0 +1,56 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode version
+      run: sudo xcode-select -switch /Applications/Xcode_15.4.app/Contents/Developer
+      
+    - name: Show Xcode version
+      run: xcodebuild -version
+      
+    - name: Cache derived data
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.pbxproj') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+    
+    - name: Build and Test
+      run: |
+        # Find the workspace or project file
+        if [ -f *.xcworkspace ]; then
+          WORKSPACE=$(ls *.xcworkspace | head -1)
+          echo "Building workspace: $WORKSPACE"
+          xcodebuild clean build test \
+            -workspace "$WORKSPACE" \
+            -scheme "Journal_App" \
+            -destination "platform=iOS Simulator,name=iPhone 15,OS=17.5" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+        elif [ -f *.xcodeproj ]; then
+          PROJECT=$(ls *.xcodeproj | head -1)
+          echo "Building project: $PROJECT"
+          xcodebuild clean build test \
+            -project "$PROJECT" \
+            -scheme "Journal_App" \
+            -destination "platform=iOS Simulator,name=iPhone 15,OS=17.5" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+        else
+          echo "No Xcode project or workspace found!"
+          exit 1
+        fi
