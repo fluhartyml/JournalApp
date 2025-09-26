@@ -7,10 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C0D12AED2E86FB72008CC648 /* .gitignore 2 in Resources */ = {isa = PBXBuildFile; fileRef = C0D12AEC2E86FB72008CC648 /* .gitignore 2 */; };
-		C0D12AEF2E86FB76008CC648 /* .gitattributes in Resources */ = {isa = PBXBuildFile; fileRef = C0D12AEE2E86FB76008CC648 /* .gitattributes */; };
-		C0F0DD9D2E86E82600899CD6 /* Journal_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F0DD9C2E86E82600899CD6 /* Journal_AppApp.swift */; };
-		C0F0DDA52E86F08300899CD6 /* README 3.md in Resources */ = {isa = PBXBuildFile; fileRef = C0F0DDA42E86F08300899CD6 /* README 3.md */; };
+		C0D12B0F2E872D9F008CC648 /* JournalApp 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B0E2E872D9F008CC648 /* JournalApp 2.swift */; };
+		C0D12B112E872E81008CC648 /* Journal_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B102E872E81008CC648 /* Journal_AppApp.swift */; };
+		C0D12B132E872EBA008CC648 /* JournalApp_DeveloperNotes 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B122E872EBA008CC648 /* JournalApp_DeveloperNotes 2.swift */; };
+		C0D12B152E872ECD008CC648 /* README 2.md in Resources */ = {isa = PBXBuildFile; fileRef = C0D12B142E872ECD008CC648 /* README 2.md */; };
+		C0D12B172E872ED5008CC648 /* .gitignore 2 in Resources */ = {isa = PBXBuildFile; fileRef = C0D12B162E872ED5008CC648 /* .gitignore 2 */; };
+		C0D12B192E87304B008CC648 /* JournalApp_DeveloperNotes 3.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B182E87304B008CC648 /* JournalApp_DeveloperNotes 3.swift */; };
+		C0D12B1B2E873773008CC648 /* JournalApp_DeveloperNotes 4.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B1A2E873773008CC648 /* JournalApp_DeveloperNotes 4.swift */; };
+		C0D12B1F2E873CDA008CC648 /* JournalApp_DeveloperNotes 5.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D12B1E2E873CDA008CC648 /* JournalApp_DeveloperNotes 5.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,10 +38,14 @@
 		C0CD30D82E6FA13200E2952D /* Journal App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Journal App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0CD30E52E6FA13200E2952D /* Journal AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Journal AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0CD30EF2E6FA13200E2952D /* Journal AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Journal AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0D12AEC2E86FB72008CC648 /* .gitignore 2 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore 2"; sourceTree = "<group>"; };
-		C0D12AEE2E86FB76008CC648 /* .gitattributes */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitattributes; sourceTree = "<group>"; };
-		C0F0DD9C2E86E82600899CD6 /* Journal_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Journal_AppApp.swift; sourceTree = "<group>"; };
-		C0F0DDA42E86F08300899CD6 /* README 3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README 3.md"; sourceTree = "<group>"; };
+		C0D12B0E2E872D9F008CC648 /* JournalApp 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalApp 2.swift"; sourceTree = "<group>"; };
+		C0D12B102E872E81008CC648 /* Journal_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Journal_AppApp.swift; sourceTree = "<group>"; };
+		C0D12B122E872EBA008CC648 /* JournalApp_DeveloperNotes 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalApp_DeveloperNotes 2.swift"; sourceTree = "<group>"; };
+		C0D12B142E872ECD008CC648 /* README 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README 2.md"; sourceTree = "<group>"; };
+		C0D12B162E872ED5008CC648 /* .gitignore 2 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore 2"; sourceTree = "<group>"; };
+		C0D12B182E87304B008CC648 /* JournalApp_DeveloperNotes 3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalApp_DeveloperNotes 3.swift"; sourceTree = "<group>"; };
+		C0D12B1A2E873773008CC648 /* JournalApp_DeveloperNotes 4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalApp_DeveloperNotes 4.swift"; sourceTree = "<group>"; };
+		C0D12B1E2E873CDA008CC648 /* JournalApp_DeveloperNotes 5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JournalApp_DeveloperNotes 5.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -90,10 +98,14 @@
 				C0CD30E82E6FA13200E2952D /* Journal AppTests */,
 				C0CD30F22E6FA13200E2952D /* Journal AppUITests */,
 				C0CD30D92E6FA13200E2952D /* Products */,
-				C0F0DD9C2E86E82600899CD6 /* Journal_AppApp.swift */,
-				C0F0DDA42E86F08300899CD6 /* README 3.md */,
-				C0D12AEC2E86FB72008CC648 /* .gitignore 2 */,
-				C0D12AEE2E86FB76008CC648 /* .gitattributes */,
+				C0D12B0E2E872D9F008CC648 /* JournalApp 2.swift */,
+				C0D12B102E872E81008CC648 /* Journal_AppApp.swift */,
+				C0D12B122E872EBA008CC648 /* JournalApp_DeveloperNotes 2.swift */,
+				C0D12B142E872ECD008CC648 /* README 2.md */,
+				C0D12B162E872ED5008CC648 /* .gitignore 2 */,
+				C0D12B182E87304B008CC648 /* JournalApp_DeveloperNotes 3.swift */,
+				C0D12B1A2E873773008CC648 /* JournalApp_DeveloperNotes 4.swift */,
+				C0D12B1E2E873CDA008CC648 /* JournalApp_DeveloperNotes 5.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,9 +239,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0D12AED2E86FB72008CC648 /* .gitignore 2 in Resources */,
-				C0F0DDA52E86F08300899CD6 /* README 3.md in Resources */,
-				C0D12AEF2E86FB76008CC648 /* .gitattributes in Resources */,
+				C0D12B172E872ED5008CC648 /* .gitignore 2 in Resources */,
+				C0D12B152E872ECD008CC648 /* README 2.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,7 +265,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0F0DD9D2E86E82600899CD6 /* Journal_AppApp.swift in Sources */,
+				C0D12B132E872EBA008CC648 /* JournalApp_DeveloperNotes 2.swift in Sources */,
+				C0D12B0F2E872D9F008CC648 /* JournalApp 2.swift in Sources */,
+				C0D12B112E872E81008CC648 /* Journal_AppApp.swift in Sources */,
+				C0D12B1F2E873CDA008CC648 /* JournalApp_DeveloperNotes 5.swift in Sources */,
+				C0D12B1B2E873773008CC648 /* JournalApp_DeveloperNotes 4.swift in Sources */,
+				C0D12B192E87304B008CC648 /* JournalApp_DeveloperNotes 3.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

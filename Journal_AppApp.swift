@@ -4,12 +4,19 @@ import SwiftUI
 struct Journal_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            RootView()
+            #if os(macOS) && !targetEnvironment(macCatalyst)
+                ContentView_MacOS()  // Pure macOS app (not Catalyst)
+            #elseif os(iOS) || targetEnvironment(macCatalyst)
+                ContentView_iOS()    // iOS and Mac Catalyst
+            #else
+                ContentView_Fallback()  // Fallback for other platforms
+            #endif
         }
     }
 }
 
-private struct RootView: View {
+// Fallback view for unsupported platforms
+struct ContentView_Fallback: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -19,16 +26,16 @@ private struct RootView: View {
                 Text("Journal App")
                     .font(.title)
                     .bold()
-                Text("Welcome! This is a placeholder root view. Replace with your actual content when ready.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
+                Text("This platform is not yet supported")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
             .padding()
-            .navigationTitle("Home")
+            .navigationTitle("Journal")
         }
     }
 }
 
-#Preview("RootView") {
-    RootView()
+#Preview("Fallback") {
+    ContentView_Fallback()
 }
