@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		C0D12AED2E86FB72008CC648 /* .gitignore 2 in Resources */ = {isa = PBXBuildFile; fileRef = C0D12AEC2E86FB72008CC648 /* .gitignore 2 */; };
 		C0D12AEF2E86FB76008CC648 /* .gitattributes in Resources */ = {isa = PBXBuildFile; fileRef = C0D12AEE2E86FB76008CC648 /* .gitattributes */; };
-		C0D12AF12E870D15008CC648 /* .githubworkflowsios-build.yml in Resources */ = {isa = PBXBuildFile; fileRef = C0D12AF02E870D15008CC648 /* .githubworkflowsios-build.yml */; };
 		C0F0DD9D2E86E82600899CD6 /* Journal_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F0DD9C2E86E82600899CD6 /* Journal_AppApp.swift */; };
 		C0F0DDA52E86F08300899CD6 /* README 3.md in Resources */ = {isa = PBXBuildFile; fileRef = C0F0DDA42E86F08300899CD6 /* README 3.md */; };
 /* End PBXBuildFile section */
@@ -37,7 +36,6 @@
 		C0CD30EF2E6FA13200E2952D /* Journal AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Journal AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0D12AEC2E86FB72008CC648 /* .gitignore 2 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore 2"; sourceTree = "<group>"; };
 		C0D12AEE2E86FB76008CC648 /* .gitattributes */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitattributes; sourceTree = "<group>"; };
-		C0D12AF02E870D15008CC648 /* .githubworkflowsios-build.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ".githubworkflowsios-build.yml"; sourceTree = "<group>"; };
 		C0F0DD9C2E86E82600899CD6 /* Journal_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Journal_AppApp.swift; sourceTree = "<group>"; };
 		C0F0DDA42E86F08300899CD6 /* README 3.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README 3.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -96,7 +94,6 @@
 				C0F0DDA42E86F08300899CD6 /* README 3.md */,
 				C0D12AEC2E86FB72008CC648 /* .gitignore 2 */,
 				C0D12AEE2E86FB76008CC648 /* .gitattributes */,
-				C0D12AF02E870D15008CC648 /* .githubworkflowsios-build.yml */,
 			);
 			sourceTree = "<group>";
 		};
@@ -233,7 +230,6 @@
 				C0D12AED2E86FB72008CC648 /* .gitignore 2 in Resources */,
 				C0F0DDA52E86F08300899CD6 /* README 3.md in Resources */,
 				C0D12AEF2E86FB76008CC648 /* .gitattributes in Resources */,
-				C0D12AF12E870D15008CC648 /* .githubworkflowsios-build.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
