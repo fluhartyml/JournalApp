@@ -1,12 +1,10 @@
+// ContentView_iOS - iOS/iPadOS only
+#if os(iOS)
 import SwiftUI
 import Foundation
-
-#if canImport(AppKit)
-import AppKit
-#endif
-
-// Platform-specific image type
-typealias PlatformImage = NSImage
+import UIKit
+import PhotosUI
+import VisionKit
 
 struct JournalEntry: Identifiable, Codable {
     let id: String
@@ -16,7 +14,7 @@ struct JournalEntry: Identifiable, Codable {
     var mood: String
     var createdAt: Date
     var modifiedAt: Date
-    var imageData: Data?
+    var imageData: Data? // Store image as Data for Codable compliance
     
     init(title: String, content: String, date: Date, mood: String, imageData: Data? = nil) {
         self.id = UUID().uuidString
@@ -35,9 +33,9 @@ struct JournalEntry: Identifiable, Codable {
         return formatter.string(from: date)
     }
     
-    var image: PlatformImage? {
+    var image: UIImage? {
         guard let imageData = imageData else { return nil }
-        return NSImage(data: imageData)
+        return UIImage(data: imageData)
     }
 }
 
@@ -64,6 +62,7 @@ class JournalManager: ObservableObject {
             entries[index].content = content
             entries[index].mood = mood
             entries[index].modifiedAt = Date()
+            // Only update image if new imageData is provided
             if let newImageData = imageData {
                 entries[index].imageData = newImageData
             }
@@ -85,9 +84,9 @@ class JournalManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(entries)
             try data.write(to: journalFileURL)
-            print("Successfully saved \(entries.count) entries")
+            print("Successfully saved \(entries.count) entries to: \(journalFileURL.path)")
         } catch {
-            print("Failed to save entries: \(error)")
+            print("Failed to save entries: \(error.localizedDescription)")
         }
     }
     
@@ -95,9 +94,9 @@ class JournalManager: ObservableObject {
         do {
             let data = try Data(contentsOf: journalFileURL)
             entries = try JSONDecoder().decode([JournalEntry].self, from: data)
-            print("Successfully loaded \(entries.count) entries")
+            print("Successfully loaded \(entries.count) entries from storage")
         } catch {
-            print("Failed to load entries: \(error)")
+            print("Failed to load entries: \(error.localizedDescription)")
             entries = []
         }
     }
@@ -127,7 +126,7 @@ class JournalManager: ObservableObject {
     }
 }
 
-struct ContentView: View {
+struct ContentView_iOS: View {
     @StateObject private var journalManager = JournalManager()
     @State private var showingNewEntry = false
     @State private var selectedEntry: JournalEntry?
@@ -150,6 +149,11 @@ struct ContentView: View {
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
+                        
+                        Text("Add photos to capture visual memories")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
                     }
                     .padding()
                 } else {
@@ -166,14 +170,14 @@ struct ContentView: View {
             }
             .navigationTitle("My Journal")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingStorageInfo = true }) {
                         Image(systemName: "info.circle")
                             .font(.title3)
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingNewEntry = true }) {
                         Image(systemName: "plus")
                             .font(.title2)
@@ -192,7 +196,6 @@ struct ContentView: View {
                 Text(journalManager.getStorageInfo())
             }
         }
-        .frame(minWidth: 800, minHeight: 600)
     }
 }
 
@@ -203,8 +206,9 @@ struct EntryRowView: View {
     
     var body: some View {
         HStack {
+            // Thumbnail image if available
             if let image = entry.image {
-                Image(nsImage: image)
+                Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 60, height: 60)
@@ -247,7 +251,9 @@ struct EntryRowView: View {
             
             Spacer()
             
-            Button(action: { showingEditSheet = true }) {
+            Button(action: {
+                showingEditSheet = true
+            }) {
                 Image(systemName: "pencil")
                     .foregroundColor(.blue)
                     .font(.title3)
@@ -261,6 +267,161 @@ struct EntryRowView: View {
     }
 }
 
+struct EntryDetailView: View {
+    let entry: JournalEntry
+    @ObservedObject var journalManager: JournalManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var isEditing = false
+    @State private var editTitle = ""
+    @State private var editContent = ""
+    @State private var editMood = ""
+    @State private var selectedImage: UIImage?
+    @State private var imageChanged = false
+    
+    let moods = ["Happy", "Sad", "Excited", "Calm", "Grateful", "Neutral"]
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Image if available
+                    if let image = (isEditing ? selectedImage : entry.image) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(12)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text(isEditing ? editMood : entry.mood)
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.blue.opacity(0.2))
+                                .cornerRadius(12)
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(entry.formattedDate)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                if entry.modifiedAt != entry.createdAt {
+                                    Text("Modified \(entry.modifiedAt, style: .relative) ago")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        
+                        if isEditing {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Title")
+                                    .font(.headline)
+                                
+                                TextField("Enter a title...", text: $editTitle)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Mood")
+                                    .font(.headline)
+                                
+                                Picker("Mood", selection: $editMood) {
+                                    ForEach(moods, id: \.self) { mood in
+                                        Text(mood).tag(mood)
+                                    }
+                                }
+                                .pickerStyle(SegmentedPickerStyle())
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Your thoughts")
+                                    .font(.headline)
+                                
+                                TextEditor(text: $editContent)
+                                    .frame(minHeight: 200)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
+                        } else {
+                            Text(entry.title)
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            
+                            Text(entry.content)
+                                .font(.body)
+                                .lineSpacing(4)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Journal Entry")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if isEditing {
+                        Button("Cancel") {
+                            isEditing = false
+                            resetEditFields()
+                        }
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if isEditing {
+                        Button("Save") {
+                            saveChanges()
+                            isEditing = false
+                        }
+                        .disabled(editTitle.isEmpty)
+                    } else {
+                        HStack {
+                            Button("Edit") {
+                                startEditing()
+                            }
+                            
+                            Button("Done") {
+                                dismiss()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            resetEditFields()
+        }
+    }
+    
+    private func startEditing() {
+        editTitle = entry.title
+        editContent = entry.content
+        editMood = entry.mood
+        selectedImage = entry.image
+        imageChanged = false
+        isEditing = true
+    }
+    
+    private func resetEditFields() {
+        editTitle = entry.title
+        editContent = entry.content
+        editMood = entry.mood
+        selectedImage = entry.image
+        imageChanged = false
+    }
+    
+    private func saveChanges() {
+        let imageData = imageChanged ? selectedImage?.jpegData(compressionQuality: 0.8) : nil
+        journalManager.updateEntry(entry, title: editTitle, content: editContent, mood: editMood, imageData: imageData)
+    }
+}
+
 struct NewEntryView: View {
     @ObservedObject var journalManager: JournalManager
     @Environment(\.dismiss) private var dismiss
@@ -268,8 +429,13 @@ struct NewEntryView: View {
     @State private var title = ""
     @State private var content = ""
     @State private var mood = "Happy"
-    @State private var selectedImage: PlatformImage?
+    @State private var selectedImage: UIImage?
+    
     @State private var showingImagePicker = false
+    @State private var showingCamera = false
+    @State private var showingDocumentScanner = false
+    @State private var showingPhotoOptions = false
+    @State private var cameraPosition: CameraPosition = .back
     
     let moods = ["Happy", "Sad", "Excited", "Calm", "Grateful", "Neutral"]
     
@@ -277,13 +443,14 @@ struct NewEntryView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Image section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Photo")
                             .font(.headline)
                         
                         if let selectedImage = selectedImage {
                             ZStack(alignment: .topTrailing) {
-                                Image(nsImage: selectedImage)
+                                Image(uiImage: selectedImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(maxHeight: 200)
@@ -299,9 +466,9 @@ struct NewEntryView: View {
                                 .padding(8)
                             }
                         } else {
-                            Button(action: { showingImagePicker = true }) {
+                            Button(action: { showingPhotoOptions = true }) {
                                 VStack(spacing: 12) {
-                                    Image(systemName: "photo")
+                                    Image(systemName: "camera.fill")
                                         .font(.title)
                                         .foregroundColor(.blue)
                                     
@@ -309,7 +476,7 @@ struct NewEntryView: View {
                                         .font(.headline)
                                         .foregroundColor(.blue)
                                     
-                                    Text("Choose from Files")
+                                    Text("Selfie • Landscape • Document")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -356,15 +523,17 @@ struct NewEntryView: View {
                 .padding()
             }
             .navigationTitle("New Entry")
-            
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        let imageData = selectedImage?.tiffRepresentation
+                        let imageData = selectedImage?.jpegData(compressionQuality: 0.8)
                         let entry = JournalEntry(
                             title: title,
                             content: content,
@@ -378,8 +547,35 @@ struct NewEntryView: View {
                     .disabled(title.isEmpty)
                 }
             }
+            .confirmationDialog("Add Photo", isPresented: $showingPhotoOptions) {
+                Button("Take Selfie") {
+                    cameraPosition = .front
+                    showingCamera = true
+                }
+                
+                Button("Take Photo") {
+                    cameraPosition = .back
+                    showingCamera = true
+                }
+                
+                Button("Scan Document") {
+                    showingDocumentScanner = true
+                }
+                
+                Button("Choose from Library") {
+                    showingImagePicker = true
+                }
+                
+                Button("Cancel", role: .cancel) { }
+            }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraView(selectedImage: $selectedImage, cameraPosition: cameraPosition)
+            }
             .sheet(isPresented: $showingImagePicker) {
-                MacImagePickerView(selectedImage: $selectedImage)
+                PhotoPickerView(selectedImage: $selectedImage)
+            }
+            .sheet(isPresented: $showingDocumentScanner) {
+                DocumentScannerView(selectedImage: $selectedImage)
             }
         }
     }
@@ -393,9 +589,14 @@ struct EditEntryView: View {
     @State private var editTitle = ""
     @State private var editContent = ""
     @State private var editMood = ""
-    @State private var selectedImage: PlatformImage?
+    @State private var selectedImage: UIImage?
     @State private var imageChanged = false
+    
     @State private var showingImagePicker = false
+    @State private var showingCamera = false
+    @State private var showingDocumentScanner = false
+    @State private var showingPhotoOptions = false
+    @State private var cameraPosition: CameraPosition = .back
     
     let moods = ["Happy", "Sad", "Excited", "Calm", "Grateful", "Neutral"]
     
@@ -403,13 +604,14 @@ struct EditEntryView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Image section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Photo")
                             .font(.headline)
                         
                         if let selectedImage = selectedImage {
                             ZStack(alignment: .topTrailing) {
-                                Image(nsImage: selectedImage)
+                                Image(uiImage: selectedImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(maxHeight: 200)
@@ -428,15 +630,19 @@ struct EditEntryView: View {
                                 .padding(8)
                             }
                         } else {
-                            Button(action: { showingImagePicker = true }) {
+                            Button(action: { showingPhotoOptions = true }) {
                                 VStack(spacing: 12) {
-                                    Image(systemName: "photo")
+                                    Image(systemName: "camera.fill")
                                         .font(.title)
                                         .foregroundColor(.blue)
                                     
                                     Text("Add Photo")
                                         .font(.headline)
                                         .foregroundColor(.blue)
+                                    
+                                    Text("Selfie • Landscape • Document")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 120)
@@ -481,23 +687,55 @@ struct EditEntryView: View {
                 .padding()
             }
             .navigationTitle("Edit Entry")
-            
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        let imageData = imageChanged ? selectedImage?.tiffRepresentation : nil
-                        journalManager.updateEntry(entry, title: editTitle, content: editContent, mood: editMood, imageData: imageData)
+                        saveChanges()
                         dismiss()
                     }
                     .disabled(editTitle.isEmpty)
                 }
             }
+            .confirmationDialog("Add Photo", isPresented: $showingPhotoOptions) {
+                Button("Take Selfie") {
+                    cameraPosition = .front
+                    showingCamera = true
+                }
+                
+                Button("Take Photo") {
+                    cameraPosition = .back
+                    showingCamera = true
+                }
+                
+                Button("Scan Document") {
+                    showingDocumentScanner = true
+                }
+                
+                Button("Choose from Library") {
+                    showingImagePicker = true
+                }
+                
+                Button("Cancel", role: .cancel) { }
+            }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraView(selectedImage: $selectedImage, cameraPosition: cameraPosition) {
+                    imageChanged = true
+                }
+            }
             .sheet(isPresented: $showingImagePicker) {
-                MacImagePickerView(selectedImage: $selectedImage) {
+                PhotoPickerView(selectedImage: $selectedImage) {
+                    imageChanged = true
+                }
+            }
+            .sheet(isPresented: $showingDocumentScanner) {
+                DocumentScannerView(selectedImage: $selectedImage) {
                     imageChanged = true
                 }
             }
@@ -510,115 +748,150 @@ struct EditEntryView: View {
             imageChanged = false
         }
     }
+    
+    private func saveChanges() {
+        let imageData = imageChanged ? selectedImage?.jpegData(compressionQuality: 0.8) : nil
+        journalManager.updateEntry(entry, title: editTitle, content: editContent, mood: editMood, imageData: imageData)
+    }
 }
 
-struct EntryDetailView: View {
-    let entry: JournalEntry
-    @ObservedObject var journalManager: JournalManager
+enum CameraPosition {
+    case front, back
+}
+
+struct CameraView: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
     @Environment(\.dismiss) private var dismiss
-    @State private var isEditing = false
+    let cameraPosition: CameraPosition
+    var onImageSelected: (() -> Void)? = nil
     
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    if let image = entry.image {
-                        Image(nsImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .cornerRadius(12)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text(entry.mood)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.blue.opacity(0.2))
-                                .cornerRadius(12)
-                            
-                            Spacer()
-                            
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text(entry.formattedDate)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                if entry.modifiedAt != entry.createdAt {
-                                    Text("Modified")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                        
-                        Text(entry.title)
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        
-                        Text(entry.content)
-                            .font(.body)
-                            .lineSpacing(4)
-                    }
-                }
-                .padding()
-            }
-            .navigationTitle("Journal Entry")
-            
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    HStack {
-                        Button("Edit") {
-                            isEditing = true
-                        }
-                        
-                        Button("Done") {
-                            dismiss()
-                        }
-                    }
-                }
-            }
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = .camera
+        picker.cameraDevice = cameraPosition == .front ? .front : .rear
+        picker.allowsEditing = true
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: CameraView
+        
+        init(_ parent: CameraView) {
+            self.parent = parent
         }
-        .sheet(isPresented: $isEditing) {
-            EditEntryView(entry: entry, journalManager: journalManager)
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let editedImage = info[.editedImage] as? UIImage {
+                parent.selectedImage = editedImage
+            } else if let originalImage = info[.originalImage] as? UIImage {
+                parent.selectedImage = originalImage
+            }
+            parent.onImageSelected?()
+            parent.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.dismiss()
         }
     }
 }
 
-struct MacImagePickerView: View {
-    @Binding var selectedImage: PlatformImage?
+struct PhotoPickerView: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
     @Environment(\.dismiss) private var dismiss
     var onImageSelected: (() -> Void)? = nil
     
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Choose an image file")
-                .font(.headline)
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        config.selectionLimit = 1
+        
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: PhotoPickerView
+        
+        init(_ parent: PhotoPickerView) {
+            self.parent = parent
+        }
+        
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true)
             
-            Button("Select Image") {
-                let openPanel = NSOpenPanel()
-                openPanel.allowedContentTypes = [.image]
-                openPanel.allowsMultipleSelection = false
-                openPanel.canChooseDirectories = false
-                openPanel.canChooseFiles = true
-                
-                if openPanel.runModal() == .OK {
-                    if let url = openPanel.url,
-                       let nsImage = NSImage(contentsOf: url) {
-                        selectedImage = nsImage
-                        onImageSelected?()
+            guard let provider = results.first?.itemProvider else { return }
+            
+            if provider.canLoadObject(ofClass: UIImage.self) {
+                provider.loadObject(ofClass: UIImage.self) { image, _ in
+                    DispatchQueue.main.async {
+                        self.parent.selectedImage = image as? UIImage
+                        self.parent.onImageSelected?()
                     }
                 }
-                dismiss()
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button("Cancel") {
-                dismiss()
             }
         }
-        .padding()
-        .frame(width: 300, height: 150)
     }
 }
+
+struct DocumentScannerView: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.dismiss) private var dismiss
+    var onImageSelected: (() -> Void)? = nil
+    
+    func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
+        let scannerViewController = VNDocumentCameraViewController()
+        scannerViewController.delegate = context.coordinator
+        return scannerViewController
+    }
+    
+    func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+        let parent: DocumentScannerView
+        
+        init(_ parent: DocumentScannerView) {
+            self.parent = parent
+        }
+        
+        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+            if scan.pageCount > 0 {
+                parent.selectedImage = scan.imageOfPage(at: 0)
+                parent.onImageSelected?()
+            }
+            parent.dismiss()
+        }
+        
+        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+            parent.dismiss()
+        }
+        
+        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+            parent.dismiss()
+        }
+    }
+}
+
+#Preview {
+    ContentView_iOS()
+}
+
+#endif // iOS only

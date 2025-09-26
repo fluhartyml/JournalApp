@@ -1,0 +1,34 @@
+//DeveloperNotes
+
+/*
+## Build Fix Summary (2025-09-16)
+Decision: Use Option B (custom Info.plist) to avoid duplicate output and support camera/scanning.
+
+Actions taken:
+- Disabled generated Info.plist (Build Settings → Packaging → Generate Info.plist File = No)
+- Set Info.plist File to the single file for the app target (e.g., Journal App/Info.plist)
+- Ensured Info.plist is NOT in Copy Bundle Resources
+- Removed any extra Info.plist files from the app target
+- Added required privacy keys to Info.plist:
+  - NSCameraUsageDescription: "We use the camera to scan documents and attach them to your journal entries."
+  - NSPhotoLibraryUsageDescription (if importing)
+  - NSPhotoLibraryAddUsageDescription (if saving)
+  - NSMicrophoneUsageDescription (if recording audio)
+
+Verification:
+- Clean Build Folder → Build succeeds (no duplicate Info.plist error)
+- Running on device: camera access no longer crashes
+
+Reference: See //XcodeFixInstructions for the step-by-step checklist.
+*/
+
+## Progress Log — 2025-09-16
+- Set Packaging → Generate Info.plist File = No
+- Set Packaging → Info.plist File = Journal App/Info.plist
+- Verified Info.plist not in Copy Bundle Resources
+- Added privacy usage descriptions to Info.plist:
+  - NSCameraUsageDescription
+  - NSPhotoLibraryUsageDescription
+  - NSPhotoLibraryAddUsageDescription
+  - NSMicrophoneUsageDescription
+- Next: Clean Build Folder, Build, and test camera flow on device

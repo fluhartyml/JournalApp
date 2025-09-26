@@ -1,0 +1,30 @@
+//DeveloperNotes
+
+/*
+## Build Fix Summary (2025-09-16)
+Decision: Use Option B (custom Info.plist) to avoid duplicate output and support camera/scanning.
+
+Actions taken:
+- Disabled generated Info.plist (Build Settings → Packaging → Generate Info.plist File = No)
+- Set Info.plist File to the single file for the app target (e.g., Journal App/Info.plist)
+- Ensured Info.plist is NOT in Copy Bundle Resources
+- Removed any extra Info.plist files from the app target
+- Added required privacy keys to Info.plist:
+  - NSCameraUsageDescription: "We use the camera to scan documents and attach them to your journal entries."
+  - NSPhotoLibraryUsageDescription (if importing)
+  - NSPhotoLibraryAddUsageDescription (if saving)
+  - NSMicrophoneUsageDescription (if recording audio)
+
+Verification:
+- Clean Build Folder → Build succeeds (no duplicate Info.plist error)
+- Running on device: camera access no longer crashes
+
+Reference: See //XcodeFixInstructions for the step-by-step checklist.
+*/
+
+<rest of the original file content>
+
+## Progress Log — 2025-09-16 (Bundle ID aligned)
+- Target Product Bundle Identifier set to `com.inkwell.journalapp`
+- Info.plist CFBundleIdentifier set to `$(PRODUCT_BUNDLE_IDENTIFIER)` so it stays in sync
+- Next: Clean Build Folder → Build → Delete any existing app on device → Run
